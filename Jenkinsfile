@@ -74,7 +74,8 @@ pipeline {
               docker build -t keystore:latest .
               rem Quick check that docker daemon is available
               docker version >nul 2>&1
-              if errorlevel 1 (
+              rem Use %ERRORLEVEL% because 'if errorlevel' with parentheses sometimes mis-parses in multi-line scripts
+              if NOT %ERRORLEVEL%==0 (
                 echo.
                 echo ERROR: Docker daemon not available. Make sure Docker Desktop (or Docker Engine) is running and Jenkins has access to the Docker daemon.
                 echo - If using Docker Desktop on Windows: start Docker Desktop and (optionally) enable "Expose daemon on tcp://localhost:2375" and configure DOCKER_HOST for the Jenkins service.
