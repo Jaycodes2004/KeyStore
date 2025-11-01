@@ -54,6 +54,34 @@ pipeline {
       }
     }
 
+    stage('Docker Build & Run') {
+      steps {
+        script {
+          if (isUnix()) {
+            sh '''
+              echo "Building Docker image keywarden:latest"
+              docker build -t keywarden:latest .
+              # Remove existing container if present
+              EXISTING=$(docker ps -aq -f name=keywarden)
+              if [ -n "$EXISTING" ]; then
+                docker rm -f $EXISTING || true
+              fi
+              docker run -d --name keywarden -p 6000:6000 keywarden:latest
+            '''
+          } else {
+            bat '''
+              echo Building Docker image keywarden:latest
+              docker build -t keywarden:latest .
+              for /f "tokens=*" %%i in ('docker ps -aq -f name=keywarden') do (
+                if not "%%i"=="" docker rm -f %%i
+              )
+              docker run -d --name keywarden -p 6000:6000 keywarden:latest
+            '''
+          }
+        }
+      }
+    }
+
     stage('Deploy to Render') {
       environment {
         SERVICE_ID = 'srv-d42h9cfgi27c73c5ope0'

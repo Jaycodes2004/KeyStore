@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    image: keywarden:latest
+    ports:
+      - "6000:6000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
