@@ -66,7 +66,7 @@ pipeline {
               if [ -n "$EXISTING" ]; then
                 docker rm -f $EXISTING || true
               fi
-              docker run -d --name keystore -p 6000:6000 keystore:latest
+              docker run -d --name keystore -p 8080:80 keystore:latest
             '''
           } else {
             bat '''
@@ -78,7 +78,7 @@ pipeline {
               for /f "delims=" %%i in ('docker ps -aq -f "name=keystore"') do (
                 if not "%%i"=="" docker rm -f %%i
               )
-              docker run -d --name keystore -p 6000:6000 keystore:latest
+              docker run -d --name keystore -p 8080:80 keystore:latest
             '''
           }
         }
