@@ -59,23 +59,33 @@ pipeline {
         script {
           if (isUnix()) {
             sh '''
-              echo "Building Docker image keywarden:latest"
-              docker build -t keywarden:latest .
+              echo "Building Docker image keystore:latest"
+              docker build -t keystore:latest .
               # Remove existing container if present
-              EXISTING=$(docker ps -aq -f name=keywarden)
+              EXISTING=$(docker ps -aq -f name=keystore)
               if [ -n "$EXISTING" ]; then
                 docker rm -f $EXISTING || true
               fi
-              docker run -d --name keywarden -p 6000:6000 keywarden:latest
+              docker run -d --name keystore -p 6000:6000 keystore:latest
             '''
           } else {
             bat '''
-              echo Building Docker image keywarden:latest
-              docker build -t keywarden:latest .
-              for /f "tokens=*" %%i in ('docker ps -aq -f name=keywarden') do (
+              echo Building Docker image keystore:latest
+              docker build -t keystore:latest .
+              rem Quick check that docker daemon is available
+              docker version >nul 2>&1
+              if errorlevel 1 (
+                echo.
+                echo ERROR: Docker daemon not available. Make sure Docker Desktop (or Docker Engine) is running and Jenkins has access to the Docker daemon.
+                echo - If using Docker Desktop on Windows: start Docker Desktop and (optionally) enable "Expose daemon on tcp://localhost:2375" and configure DOCKER_HOST for the Jenkins service.
+                echo - If Jenkins runs as a Windows service, run the service under a user that can access the Docker daemon or expose the daemon via TCP.
+                exit /b 1
+              )
+              rem Remove any existing container named 'keystore' (use proper filter quoting)
+              for /f "delims=" %%i in ('docker ps -aq -f "name=keystore"') do (
                 if not "%%i"=="" docker rm -f %%i
               )
-              docker run -d --name keywarden -p 6000:6000 keywarden:latest
+              docker run -d --name keystore -p 6000:6000 keystore:latest
             '''
           }
         }
